@@ -1,3 +1,4 @@
+import pyray
 import pyray as pr
 import random
 import time
@@ -6,7 +7,7 @@ class Pacman:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.health = 3
+        self.health = 3 #зачем ??
         self.status = {
             "moving": "none",
             "power-ups": [],
@@ -34,6 +35,67 @@ class Pacman:
     def draw(self):
         if self.status["alive"]:
             pr.draw_circle(self.x, self.y, 20, pr.YELLOW)
+
+class Ghost():
+    def __init__(self,x,y,color):
+        self.x=x
+        self.y=y
+        self.status={
+            'moving':'none',
+            'alive':True,
+            'mode':'hunt'
+        }
+        self.cost=200
+        self.color=color
+
+    def move(self, pacman):
+        if self.status["alive"]:
+
+            # ЭТОТ ВАРИАНТ РАБОАЕТ НАОБОРОТ, МОЖНО ИСПОЛЬЗОВАТЬ ДЛЯ МЕХАНИКИ FEAR
+
+            # if abs(self.x-pacman.x) >= abs(self.y-pacman.y):
+            #     if self.x >= pacman.x:
+            #         self.x-=3
+            #         direction = 'left'
+            #     else:
+            #         self.x+=3
+            #         direction = 'right'
+            # else:
+            #     if self.y >= pacman.y:
+            #         self.y+=3
+            #         direction='down'
+            #     else:
+            #         self.y-=3
+            #         direction='up'
+
+
+            if abs(self.x-pacman.x) >= abs(self.y-pacman.y):
+                if self.x >= pacman.x:
+                    self.x-=3
+                    direction = 'left'
+                else:
+                    self.x+=3
+                    direction = 'right'
+            else:
+                if self.y >= pacman.y:
+                    self.y-=3
+                    direction='down'
+                else:
+                    self.y+=3
+                    direction='up'
+            self.status["moving"] = direction
+
+    def draw(self):
+        if self.status['alive']:
+            pr.draw_circle(self.x, self.y, 20, self.color)
+
+
+    def collide(self, pacman):
+        if self.status['alive']:
+            if (pacman.x - self.x) ** 2 + (pacman.y - self.y) ** 2 < 25 ** 2:
+                pacman.status['alive']=False
+                print("YOU SUCK")
+
 
 class Fruit:
     def __init__(self, x, y, points):
@@ -76,6 +138,14 @@ def FruitDraw(fruits):
     for fruit in fruits:
         fruit.draw()
 
+def GhostUpdate(ghosts,pacman):
+    for ghost in ghosts:
+        ghost.draw()
+    for ghost in ghosts:
+        ghost.collide(pacman)
+    for ghost in ghosts:
+        ghost.move(pacman)
+
 
 def eat(fruits, pacman):
     for fruit in fruits[:]:
@@ -85,14 +155,18 @@ def eat(fruits, pacman):
 
 
 def movee(pacman):
-    if pr.is_key_down(pr.KEY_UP):
+    if pr.is_key_down(pr.KeyboardKey.KEY_W):
         pacman.move("up")
-    elif pr.is_key_down(pr.KEY_DOWN):
+    elif pr.is_key_down(pr.KeyboardKey.KEY_S):
         pacman.move("down")
-    elif pr.is_key_down(pr.KEY_LEFT):
+    elif pr.is_key_down(pr.KeyboardKey.KEY_A):
         pacman.move("left")
-    elif pr.is_key_down(pr.KEY_RIGHT):
+    elif pr.is_key_down(pr.KeyboardKey.KEY_D):
         pacman.move("right")
+    else:
+        pacman.move('none')
+
+    #print(pacman.status['moving'])
 
 def createe():
     pr.init_window(800, 600, "Pacman")
@@ -103,13 +177,28 @@ def createe():
         Energizer(random.randrange(799), random.randrange(599)),
         Cherry(random.randrange(799), random.randrange(599))
     ]
-    return fruits, pacman
+    ghosts=[
+        Ghost(700, 200, pyray.GREEN),
+        Ghost(700, 300, pyray.ORANGE),
+        Ghost(600, 150, pyray.PINK),
+        Ghost(500, 400, pyray.SKYBLUE),
+    ]
+    return fruits, pacman, ghosts
 
 def main():
-    fruits, pacman = createe()
+    fruits, pacman, ghosts = createe()
+    frames=0
     while not pr.window_should_close():
-        movee(pacman)
-        eat(fruits, pacman)
+        playing=pacman.status['alive']
+        frames+=1
+        if playing:
+            movee(pacman)
+            GhostUpdate(ghosts, pacman)
+            eat(fruits, pacman)
+        else:
+            if (frames//30)%2:
+                pr.draw_text('GAME OVER', 200, 200, 75, pr.RED)
+            pr.draw_text('Better luck next time!', 220, 500, 35, pr.RAYWHITE)
         pr.begin_drawing()
         pr.clear_background(pr.BLACK)
         pacman.draw()
