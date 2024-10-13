@@ -2,6 +2,8 @@ import pyray
 import pyray as pr
 import random
 import time
+import numpy as np
+
 
 class Pacman:
     def __init__(self, x, y):
@@ -34,7 +36,7 @@ class Pacman:
 
     def draw(self):
         if self.status["alive"]:
-            pr.draw_circle(self.x, self.y, 20, pr.YELLOW)
+            pr.draw_circle(self.x, self.y, 10, pr.YELLOW)
 
 class Ghost():
     def __init__(self,x,y,color):
@@ -134,6 +136,61 @@ class Cherry(Fruit):
         pr.draw_circle(self.x, self.y, 8, pr.RED)
 
 
+map = [
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "X            XX            X",
+            "X XXXX XXXXX XX XXXXX XXXX X",
+            "X XXXX XXXXX XX XXXXX XXXX X",
+            "X XXXX XXXXX XX XXXXX XXXX X",
+            "X                          X",
+            "X XXXX XX XXXXXXXX XX XXXX X",
+            "X XXXX XX XXXXXXXX XX XXXX X",
+            "X      XX    XX    XX      X",
+            "XXXXXX XXXXX XX XXXXX XXXXXX",
+            "XXXXXX XXXXX XX XXXXX XXXXXX",
+            "XXXXXX XX    p     XX XXXXXX",
+            "XXXXXX XX XXXXXXXX XX XXXXXX",
+            "XXXXXX XX X      X XX XXXXXX",
+            "          X      X          ",
+            "XXXXXX XX X      X XX XXXXXX",
+            "XXXXXX XX XXXXXXXX XX XXXXXX",
+            "XXXXXX XX          XX XXXXXX",
+            "XXXXXX XXXXX XX XXXXX XXXXXX",
+            "XXXXXX XXXXX XX XXXXX XXXXXX",
+            "X      XX    XX    XX      X",
+            "X XXXX XX XXXXXXXX XX XXXX X",
+            "X XXXX XX XXXXXXXX XX XXXX X",
+            "X                          X",
+            "X XXXX XXXXX XX XXXXX XXXX X",
+            "X XXXX XXXXX XX XXXXX XXXX X",
+            "X XXXX XXXXX XX XXXXX XXXX X",
+            "X            XX            X",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        ]
+
+class Wall:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.height = 30
+        self.width = 25
+
+    def draww(self):
+        pr.draw_rectangle(
+            self.x,
+            self.y,
+            self.height,
+            self.width,
+            pr.BLUE
+        )
+
+def draw_map(map_data):
+    for y, row in enumerate(map_data):
+        for x, char in enumerate(row):
+            if char == "X":
+                wall = Wall(x * 30, y * 25)
+                wall.draww()
+
 def FruitDraw(fruits):
     for fruit in fruits:
         fruit.draw()
@@ -169,9 +226,9 @@ def movee(pacman):
     #print(pacman.status['moving'])
 
 def createe():
-    pr.init_window(800, 600, "Pacman")
+    pr.init_window(840, 840, "Pacman")
     pr.set_target_fps(60)
-    pacman = Pacman(400, 300)
+    pacman = Pacman(400, 287)
     fruits = [
         Seed(random.randrange(799), random.randrange(599)),
         Energizer(random.randrange(799), random.randrange(599)),
