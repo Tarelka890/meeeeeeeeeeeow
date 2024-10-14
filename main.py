@@ -9,7 +9,7 @@ class Pacman:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.health = 3 #зачем ??
+        self.health = 3 #зачем ?? я хз.(((
         self.status = {
             "moving": "none",
             "power-ups": [],
@@ -20,13 +20,13 @@ class Pacman:
     def move(self, direction):
         if self.status["alive"]:
             if direction == "up":
-                self.y -= 5
+                self.y -= 25
             elif direction == "down":
-                self.y += 5
+                self.y += 25
             elif direction == "left":
-                self.x -= 5
+                self.x -= 30
             elif direction == "right":
-                self.x += 5
+                self.x += 30
             self.status["moving"] = direction
 
     def eat(self, fruit):
@@ -39,20 +39,22 @@ class Pacman:
             pr.draw_circle(self.x, self.y, 10, pr.YELLOW)
             pr.draw_circle(self.x, self.y, 10, pr.YELLOW)
 
-class Ghost():
-    def __init__(self,x,y,color):
-        self.x=x
-        self.y=y
-        self.status={
-            'moving':'none',
-            'alive':True,
-            'mode':'hunt'
-        }
-        self.cost=200
-        self.color=color
 
-    def move(self, pacman):
+class Ghost():
+    def __init__(self, x, y, color):
+        self.x = x
+        self.y = y
+        self.status = {
+            'moving': 'none',
+            'alive': True,
+            'mode': 'hunt'
+        }
+        self.cost = 200
+        self.color = color
+
+    def move(self, pacman, map_data, direction=None):
         if self.status["alive"]:
+            new_x, new_y = self.x, self.y
 
             # ЭТОТ ВАРИАНТ РАБОАЕТ НАОБОРОТ, МОЖНО ИСПОЛЬЗОВАТЬ ДЛЯ МЕХАНИКИ FEAR
 
@@ -71,32 +73,28 @@ class Ghost():
             #         self.y-=3
             #         direction='up'
 
-
-            if abs(self.x-pacman.x) >= abs(self.y-pacman.y):
+            if abs(self.x - pacman.x) >= abs(self.y - pacman.y):
                 if self.x >= pacman.x:
-                    self.x-=3
-                    direction = 'left'
+                    new_x -= 3
                 else:
-                    self.x+=3
-                    direction = 'right'
+                    new_x += 3
             else:
                 if self.y >= pacman.y:
-                    self.y-=3
-                    direction='down'
+                    new_y -= 3
                 else:
-                    self.y+=3
-                    direction='up'
+                    new_y += 3
+            if map_data[int(new_y // 25)][int(new_x // 30)] != "X":
+                self.x, self.y = new_x, new_y
             self.status["moving"] = direction
 
     def draw(self):
         if self.status['alive']:
-            pr.draw_circle(self.x, self.y, 20, self.color)
-
+            pr.draw_circle(self.x, self.y, 10, self.color)
 
     def collide(self, pacman):
         if self.status['alive']:
             if (pacman.x - self.x) ** 2 + (pacman.y - self.y) ** 2 < 25 ** 2:
-                pacman.status['alive']=False
+                pacman.status['alive'] = False
                 print("YOU SUCK")
 
 
@@ -138,36 +136,37 @@ class Cherry(Fruit):
 
 
 map = [
-            "XXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-            "X            XX            X",
-            "X XXXX XXXXX XX XXXXX XXXX X",
-            "X XXXX XXXXX XX XXXXX XXXX X",
-            "X XXXX XXXXX XX XXXXX XXXX X",
-            "X                          X",
-            "X XXXX XX XXXXXXXX XX XXXX X",
-            "X XXXX XX XXXXXXXX XX XXXX X",
-            "X      XX    XX    XX      X",
-            "XXXXXX XXXXX XX XXXXX XXXXXX",
-            "XXXXXX XXXXX XX XXXXX XXXXXX",
-            "XXXXXX XX    p     XX XXXXXX",
-            "XXXXXX XX XXXXXXXX XX XXXXXX",
-            "XXXXXX XX X      X XX XXXXXX",
-            "          X      X          ",
-            "XXXXXX XX X      X XX XXXXXX",
-            "XXXXXX XX XXXXXXXX XX XXXXXX",
-            "XXXXXX XX          XX XXXXXX",
-            "XXXXXX XXXXX XX XXXXX XXXXXX",
-            "XXXXXX XXXXX XX XXXXX XXXXXX",
-            "X      XX    XX    XX      X",
-            "X XXXX XX XXXXXXXX XX XXXX X",
-            "X XXXX XX XXXXXXXX XX XXXX X",
-            "X                          X",
-            "X XXXX XXXXX XX XXXXX XXXX X",
-            "X XXXX XXXXX XX XXXXX XXXX X",
-            "X XXXX XXXXX XX XXXXX XXXX X",
-            "X            XX            X",
-            "XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-        ]
+    list("XXXXXXXXXXXXXXXXXXXXXXXXXXXX"),
+    list("Xp           XX            X"),
+    list("X XXXX XXXXX XX XXXXX XXXX X"),
+    list("X XXXX XXXXX XX XXXXX XXXX X"),
+    list("X XXXX XXXXX XX XXXXX XXXX X"),
+    list("X                          X"),
+    list("X XXXX XX XXXXXXXX XX XXXX X"),
+    list("X XXXX XX XXXXXXXX XX XXXX X"),
+    list("X      XX    XX    XX      X"),
+    list("XXXXXX XXXXX XX XXXXX XXXXXX"),
+    list("XXXXXX XXXXX XX XXXXX XXXXXX"),
+    list("XXXXXX XX          XX XXXXXX"),
+    list("XXXXXX XX XXX  XXX XX XXXXXX"),
+    list("XXXXXX XX X      X XX XXXXXX"),
+    list("          X  g g X          "),
+    list("XXXXXX XX X  g g X XX XXXXXX"),
+    list("XXXXXX XX XXXXXXXX XX XXXXXX"),
+    list("XXXXXX XX          XX XXXXXX"),
+    list("XXXXXX XXXXX XX XXXXX XXXXXX"),
+    list("XXXXXX XXXXX XX XXXXX XXXXXX"),
+    list("X      XX    XX    XX      X"),
+    list("X XXXX XX XXXXXXXX XX XXXX X"),
+    list("X XXXX XX XXXXXXXX XX XXXX X"),
+    list("X                          X"),
+    list("X XXXX XXXXX XX XXXXX XXXX X"),
+    list("X XXXX XXXXX XX XXXXX XXXX X"),
+    list("X XXXX XXXXX XX XXXXX XXXX X"),
+    list("X            XX            X"),
+    list("XXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+
+]
 
 class Wall:
     def __init__(self, x, y):
@@ -185,24 +184,46 @@ class Wall:
             pr.BLUE
         )
 
-def draw_map(map_data):
-    for y, row in enumerate(map_data):
-        for x, char in enumerate(row):
-            if char == "X":
-                wall = Wall(x * 30, y * 25)
+
+def draw_map(map_data, pacman):
+    current_x, current_y = pacman.x, pacman.y
+    for i in range(len(map_data)):
+        for j in range(len(map_data[i])):
+            if map_data[i][j] == "X":
+                wall = Wall(j * 30, i * 25)
                 wall.draww()
+            if map_data[i][j] == "p":
+                new_x, new_y = current_x, current_y
+                if pr.is_key_down(pr.KeyboardKey.KEY_W):
+                    new_y -= 25
+                elif pr.is_key_down(pr.KeyboardKey.KEY_S):
+                    new_y += 25
+                elif pr.is_key_down(pr.KeyboardKey.KEY_A):
+                    new_x -= 30
+                elif pr.is_key_down(pr.KeyboardKey.KEY_D):
+                    new_x += 30
+                if map_data[int(new_y // 25)][int(new_x // 30)] != "X":
+                    pacman.x, pacman.y = new_x, new_y
+                    map_data[i][j] = " "
+                    map_data[int(new_y // 25)][int(new_x // 30)] = "p"
+                else:
+                    if pr.is_key_down(pr.KeyboardKey.KEY_W) and map_data[i - 1][j] != "X":
+                        new_y -= 25
+                    elif pr.is_key_down(pr.KeyboardKey.KEY_S) and map_data[i + 1][j] != "X":
+                        new_y += 25
+                    elif pr.is_key_down(pr.KeyboardKey.KEY_A) and map_data[i][j - 1] != "X":
+                        new_x -= 30
+                    elif pr.is_key_down(pr.KeyboardKey.KEY_D) and map_data[i][j + 1] != "X":
+                        new_x += 30
+                    if map_data[int(new_y // 25)][int(new_x // 30)] != "X":
+                        pacman.x, pacman.y = new_x, new_y
+                        map_data[i][j] = " "
+                        map_data[int(new_y // 25)][int(new_x // 30)] = "p"
+
 
 def FruitDraw(fruits):
     for fruit in fruits:
         fruit.draw()
-
-def GhostUpdate(ghosts,pacman):
-    for ghost in ghosts:
-        ghost.draw()
-    for ghost in ghosts:
-        ghost.collide(pacman)
-    for ghost in ghosts:
-        ghost.move(pacman)
 
 
 def eat(fruits, pacman):
@@ -212,36 +233,35 @@ def eat(fruits, pacman):
             fruit.eating()
 
 
-def movee(pacman):
-    if pr.is_key_down(pr.KeyboardKey.KEY_W):
-        pacman.move("up")
-    elif pr.is_key_down(pr.KeyboardKey.KEY_S):
-        pacman.move("down")
-    elif pr.is_key_down(pr.KeyboardKey.KEY_A):
-        pacman.move("left")
-    elif pr.is_key_down(pr.KeyboardKey.KEY_D):
-        pacman.move("right")
-    else:
-        pacman.move('none')
 
     #print(pacman.status['moving'])
 
 def createe():
-    pr.init_window(840, 840, "Pacman")
-    pr.set_target_fps(60)
-    pacman = Pacman(400, 287)
+    pr.init_window(840, 725, "Pacman")
+    pr.set_target_fps(10)
+    pacman = Pacman(45, 37)
     fruits = [
         Seed(random.randrange(799), random.randrange(599)),
         Energizer(random.randrange(799), random.randrange(599)),
         Cherry(random.randrange(799), random.randrange(599))
     ]
-    ghosts=[
-        Ghost(700, 200, pyray.GREEN),
-        Ghost(700, 300, pyray.ORANGE),
-        Ghost(600, 150, pyray.PINK),
-        Ghost(500, 400, pyray.SKYBLUE),
+    ghost= []
+    for i in range(len(map)):
+        for j in range(len(map[i])):
+            if map[i][j] == 'g':
+                ghost.append((j * 30 + 15, i * 25 + 15))
+    ghost = [
+        Ghost(x, y, pyray.GREEN) for (x, y) in ghost
     ]
-    return fruits, pacman, ghosts
+    return fruits, pacman, ghost
+
+def GhostUpdate(ghosts, pacman, map_data):
+    for ghost in ghosts:
+        ghost.move(pacman, map_data)
+        ghost.draw()
+    for ghost in ghosts:
+        ghost.collide(pacman)
+
 
 def main():
     fruits, pacman, ghosts = createe()
@@ -249,10 +269,11 @@ def main():
     while not pr.window_should_close():
         playing=pacman.status['alive']
         frames+=1
+        draw_map(map, pacman)
         if playing:
-            movee(pacman)
-            GhostUpdate(ghosts, pacman)
+            GhostUpdate(ghosts, pacman, map)
             eat(fruits, pacman)
+
         else:
             if (frames//30)%2:
                 pr.draw_text('GAME OVER', 200, 200, 75, pr.RED)
