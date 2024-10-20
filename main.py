@@ -39,7 +39,6 @@ class Pacman:
             pr.draw_circle(self.x, self.y, 10, pr.YELLOW)
             pr.draw_circle(self.x, self.y, 10, pr.YELLOW)
 
-
 class Ghost():
     def __init__(self, x, y, color):
         self.x = x
